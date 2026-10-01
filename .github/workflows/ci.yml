@@ -9,6 +9,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      # Dummy values: tests mock Supabase, but the client module requires these to be set.
+      VITE_SUPABASE_URL: https://example.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
     steps:
       - uses: actions/checkout@v4
 
@@ -18,6 +22,11 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm run lint
-      - run: npm run build
-      - run: npm test
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests (hooks, components)
+        run: npx vitest run src/hooks src/components
+      - name: Regression tests (full suite incl. App)
+        run: npm test
+      - name: Build
+        run: npm run build
